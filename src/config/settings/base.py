@@ -1,7 +1,6 @@
 """
 Base settings shared across all environments.
 """
-import os
 from pathlib import Path
 
 import environ
@@ -57,6 +56,7 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "apps.tenants.middleware.ActiveTenantMiddleware",
 ]
@@ -74,6 +74,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.csp",
                 "apps.tenants.context_processors.tenant_context",
             ],
         },
@@ -133,4 +134,14 @@ UNFOLD = {
     "SITE_TITLE": "Django Base App",
     "SITE_HEADER": "Django Base App",
     "SITE_SYMBOL": "dashboard",
+}
+
+# Content Security Policy (Django 6.0 built-in)
+SECURE_CSP = {
+    "default-src": ["'self'"],
+    "script-src": ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+    "style-src": ["'self'", "https://cdn.jsdelivr.net"],
+    "font-src": ["'self'", "https://cdn.jsdelivr.net"],
+    "img-src": ["'self'", "data:"],
+    "connect-src": ["'self'"],
 }

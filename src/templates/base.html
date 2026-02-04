@@ -16,7 +16,18 @@
     {% endif %}
 
     <main class="{% if user.is_authenticated %}container-fluid{% else %}container{% endif %}">
-        {% include "includes/messages.html" %}
+        {% partialdef messages inline %}
+        {% if messages %}
+        <div class="mt-3" id="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endpartialdef %}
         {% block content %}{% endblock %}
     </main>
 

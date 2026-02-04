@@ -28,7 +28,9 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="card shadow-sm">
+        <!-- 2FA status: renderable as HTMX fragment via "accounts/profile.html#totp_status" -->
+        {% partialdef totp_status inline %}
+        <div class="card shadow-sm" id="totp-status">
             <div class="card-header">
                 <h5 class="mb-0">Two-Factor Authentication</h5>
             </div>
@@ -46,6 +48,7 @@
                 {% endif %}
             </div>
         </div>
+        {% endpartialdef %}
     </div>
 </div>
 {% endblock %}

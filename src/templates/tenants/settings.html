@@ -36,7 +36,9 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="card shadow-sm">
+        <!-- Members table: renderable as HTMX fragment via "tenants/settings.html#members_table" -->
+        {% partialdef members_table inline %}
+        <div class="card shadow-sm" id="members-table">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Members</h5>
                 <span class="badge bg-primary">{{ members|length }}</span>
@@ -70,6 +72,7 @@
                 </div>
             </div>
         </div>
+        {% endpartialdef %}
     </div>
 </div>
 {% endblock %}

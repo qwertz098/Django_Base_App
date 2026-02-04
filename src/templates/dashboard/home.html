@@ -13,8 +13,9 @@
         {% endif %}
     </div>
 
-    <!-- Tenant overview cards -->
-    <div class="row g-4 mb-4">
+    <!-- Tenant overview cards: renderable as HTMX fragment via "dashboard/home.html#tenant_cards" -->
+    {% partialdef tenant_cards inline %}
+    <div class="row g-4 mb-4" id="tenant-cards">
         {% for membership in memberships %}
         <div class="col-md-6 col-lg-4">
             <div class="card shadow-sm h-100 {% if active_tenant and membership.tenant.id == active_tenant.id %}border-primary{% endif %}">
@@ -62,10 +63,11 @@
         </div>
         {% endfor %}
     </div>
+    {% endpartialdef %}
 
     <!-- Placeholder for future app widgets -->
     {% if active_tenant %}
-    <div class="row g-4" id="app-widgets" hx-get="" hx-trigger="load" hx-swap="innerHTML">
+    <div class="row g-4" id="app-widgets">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-body text-center text-muted py-4">
