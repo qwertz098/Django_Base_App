@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+set REPO_URL=https://github.com/qwertz098/Django_Base_App.git
+set BRANCH=claude/plan-django-template-PQRYt
 set PROJECT_DIR=%~dp0
 set VENV_DIR=%PROJECT_DIR%venv
 set SRC_DIR=%PROJECT_DIR%src
@@ -13,13 +15,26 @@ echo  Django Base App - Local Setup
 echo ========================================
 echo.
 
-:: Pull latest changes
-echo [1/6] Pulling latest changes...
-git -C "%PROJECT_DIR%" pull origin claude/plan-django-template-PQRYt
-if errorlevel 1 (
-    echo ERROR: git pull failed.
-    pause
-    exit /b 1
+:: Clone or pull
+if not exist "%PROJECT_DIR%.git" (
+    echo [1/6] Cloning repository...
+    git clone -b %BRANCH% %REPO_URL% "%PROJECT_DIR%_tmp"
+    if errorlevel 1 (
+        echo ERROR: git clone failed.
+        pause
+        exit /b 1
+    )
+    :: Move contents from temp clone into project dir (bat is already here)
+    xcopy /E /Y /Q "%PROJECT_DIR%_tmp\*" "%PROJECT_DIR%" >nul
+    rmdir /S /Q "%PROJECT_DIR%_tmp"
+) else (
+    echo [1/6] Pulling latest changes...
+    git -C "%PROJECT_DIR%" pull origin %BRANCH%
+    if errorlevel 1 (
+        echo ERROR: git pull failed.
+        pause
+        exit /b 1
+    )
 )
 echo.
 
