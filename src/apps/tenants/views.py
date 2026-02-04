@@ -1,10 +1,23 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import TenantForm, TenantSettingsForm
+from .forms import AddMemberForm, TenantForm, TenantSettingsForm
 from .models import Tenant, TenantMembership
+
+User = get_user_model()
+
+
+def _require_tenant_admin(request):
+    """Return an error response if user is not a tenant admin, or None if OK."""
+    if not request.tenant:
+        messages.warning(request, "No active tenant.")
+        return redirect("dashboard:home")
+    if not request.tenant_membership or not request.tenant_membership.is_admin:
+        return HttpResponseForbidden("You must be a tenant admin to access this page.")
+    return None
 
 
 @login_required
@@ -21,12 +34,9 @@ def switch_tenant(request, tenant_id):
 @login_required
 def tenant_settings(request):
     """Tenant settings page (admin only)."""
-    if not request.tenant:
-        messages.warning(request, "No active tenant.")
-        return redirect("dashboard:home")
-
-    if not request.tenant_membership or not request.tenant_membership.is_admin:
-        return HttpResponseForbidden("You must be a tenant admin to access settings.")
+    error = _require_tenant_admin(request)
+    if error:
+        return error
 
     if request.method == "POST":
         form = TenantSettingsForm(request.POST, instance=request.tenant)
@@ -38,7 +48,56 @@ def tenant_settings(request):
         form = TenantSettingsForm(instance=request.tenant)
 
     members = TenantMembership.objects.filter(tenant=request.tenant).select_related("user")
-    return render(request, "tenants/settings.html", {"form": form, "members": members})
+    add_member_form = AddMemberForm(tenant=request.tenant)
+    return render(request, "tenants/settings.html", {
+        "form": form,
+        "members": members,
+        "add_member_form": add_member_form,
+    })
+
+
+@login_required
+def add_member(request):
+    """Add a user to the active tenant (admin only)."""
+    error = _require_tenant_admin(request)
+    if error:
+        return error
+
+    if request.method == "POST":
+        form = AddMemberForm(request.POST, tenant=request.tenant)
+        if form.is_valid():
+            user = User.objects.get(username=form.cleaned_data["username"])
+            TenantMembership.objects.create(
+                tenant=request.tenant,
+                user=user,
+                role=form.cleaned_data["role"],
+            )
+            messages.success(request, f"Added {user.username} to {request.tenant.name}.")
+        else:
+            for field_errors in form.errors.values():
+                for err in field_errors:
+                    messages.error(request, err)
+
+    return redirect("tenants:settings")
+
+
+@login_required
+def remove_member(request, membership_id):
+    """Remove a user from the active tenant (admin only)."""
+    error = _require_tenant_admin(request)
+    if error:
+        return error
+
+    membership = get_object_or_404(TenantMembership, id=membership_id, tenant=request.tenant)
+
+    if membership.user == request.user:
+        messages.error(request, "You cannot remove yourself from the tenant.")
+        return redirect("tenants:settings")
+
+    username = membership.user.username
+    membership.delete()
+    messages.success(request, f"Removed {username} from {request.tenant.name}.")
+    return redirect("tenants:settings")
 
 
 @login_required

@@ -67,6 +67,11 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # First user becomes app admin (superuser)
+            if User.objects.count() == 1:
+                user.is_superuser = True
+                user.is_staff = True
+                user.save(update_fields=["is_superuser", "is_staff"])
             login(request, user)
             messages.success(request, "Registration successful.")
             return redirect("dashboard:home")
