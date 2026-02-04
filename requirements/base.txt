@@ -1,0 +1,6 @@
+Django>=5.1,<5.2
+django-environ>=0.11,<1.0
+django-htmx>=1.19,<2.0
+django-unfold>=0.40,<1.0
+django-otp>=1.5,<2.0
+qrcode[pil]>=7.4,<8.0

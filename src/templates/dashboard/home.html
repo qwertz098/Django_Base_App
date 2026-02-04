@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Django Base App{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard</h2>
+        {% if active_tenant %}
+        <span class="badge bg-primary fs-6">
+            <i class="bi bi-building"></i> {{ active_tenant.name }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Tenant overview cards -->
+    <div class="row g-4 mb-4">
+        {% for membership in memberships %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100 {% if active_tenant and membership.tenant.id == active_tenant.id %}border-primary{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title">
+                            <i class="bi bi-building"></i> {{ membership.tenant.name }}
+                        </h5>
+                        <span class="badge bg-{% if membership.is_admin %}warning{% else %}secondary{% endif %}">
+                            {{ membership.get_role_display }}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-2">
+                        Member since {{ membership.joined_at|date:"M d, Y" }}
+                    </p>
+                    {% if membership.tenant.require_2fa %}
+                    <span class="badge bg-info">
+                        <i class="bi bi-shield-check"></i> 2FA Required
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'tenants:switch' membership.tenant.id %}" class="btn btn-sm btn-outline-primary">
+                        {% if active_tenant and membership.tenant.id == active_tenant.id %}
+                            Active
+                        {% else %}
+                            Switch to this tenant
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-building" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">No Tenants Yet</h4>
+                    <p class="text-muted">Create your first tenant to get started.</p>
+                    <a href="{% url 'tenants:create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Tenant
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Placeholder for future app widgets -->
+    {% if active_tenant %}
+    <div class="row g-4" id="app-widgets" hx-get="" hx-trigger="load" hx-swap="innerHTML">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body text-center text-muted py-4">
+                    <i class="bi bi-puzzle" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">App widgets will appear here as you add apps to the project.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

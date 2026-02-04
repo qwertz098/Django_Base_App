@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Enable 2FA - Django Base App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Set Up Two-Factor Authentication</h5>
+            </div>
+            <div class="card-body">
+                <p>Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc.):</p>
+                <div class="text-center mb-3">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid border rounded">
+                </div>
+                <p class="text-muted small">
+                    Can't scan? Enter this key manually: <code>{{ secret_key }}</code>
+                </p>
+                <hr>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.otp_token.id_for_label }}" class="form-label">
+                            Enter the 6-digit code from your authenticator app:
+                        </label>
+                        {{ form.otp_token }}
+                        {% for error in form.otp_token.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Verify &amp; Enable 2FA</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard:home' %}">
+            <i class="bi bi-grid-3x3-gap-fill"></i> Django Base App
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:home' %}">
+                        <i class="bi bi-house"></i> Dashboard
+                    </a>
+                </li>
+                {% if active_membership and active_membership.is_admin %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tenants:settings' %}">
+                        <i class="bi bi-gear"></i> Tenant Settings
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}">
+                        <i class="bi bi-shield-lock"></i> Admin
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <!-- Tenant switcher -->
+            <ul class="navbar-nav">
+                {% if user_tenants|length > 0 %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-building"></i>
+                        {% if active_tenant %}
+                            {{ active_tenant.name }}
+                        {% else %}
+                            No Tenant Selected
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% for membership in user_tenants %}
+                        <li>
+                            <a class="dropdown-item {% if active_tenant and membership.tenant.id == active_tenant.id %}active{% endif %}"
+                               href="{% url 'tenants:switch' membership.tenant.id %}">
+                                {{ membership.tenant.name }}
+                                <span class="badge bg-secondary ms-1">{{ membership.get_role_display }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'tenants:create' %}">
+                                <i class="bi bi-plus-circle"></i> Create Tenant
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tenants:create' %}">
+                        <i class="bi bi-plus-circle"></i> Create Tenant
+                    </a>
+                </li>
+                {% endif %}
+
+                <!-- User menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                <i class="bi bi-person"></i> Profile
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

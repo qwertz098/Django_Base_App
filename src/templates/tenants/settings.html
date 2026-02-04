@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Tenant Settings - {{ active_tenant.name }}{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Tenant Settings: {{ active_tenant.name }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        {% if field.field.widget.input_type == "checkbox" %}
+                        <div class="form-check">
+                            {{ field }}
+                            <label for="{{ field.id_for_label }}" class="form-check-label">{{ field.label }}</label>
+                        </div>
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {% else %}
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Members</h5>
+                <span class="badge bg-primary">{{ members|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for membership in members %}
+                            <tr>
+                                <td>{{ membership.user.username }}</td>
+                                <td>{{ membership.user.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if membership.is_admin %}warning{% else %}secondary{% endif %}">
+                                        {{ membership.get_role_display }}
+                                    </span>
+                                </td>
+                                <td>{{ membership.joined_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
